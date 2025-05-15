@@ -31,17 +31,25 @@ jobs:
         curl -fsSL https://patch-diff.githubusercontent.com/raw/zerosuxx/terraform-fork/pull/1.diff | git apply -v -
 
     - name: Build with gox
+      working-directory: ./terraform
       run: |
-        cd terraform
-        mkdir -p build
+        go mod download
         gox -os="linux darwin" -arch="amd64 arm64" \
-            -output="build/terraform-{{.OS}}-{{.Arch}}"
+            -ldflags "${LD_FLAGS}" \
+            -output="build/terraform-{{.Arch}}-{{.OS}}"
 
-    - name: Create GitHub Release and upload binaries
+        for f in build/*_arm64; do
+          mv -v "$f" "${f/_arm64/_aarch64}"
+        done
+      env:
+        LD_FLAGS: "-s -w -X 'github.com/hashicorp/terraform/version.dev=no'"
+        GOFLAGS: "-mod=readonly"
+        CGO_ENABLED: 0
+
+    - name: Upload binaries
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ github.ref_name }}
-        name: "Terraform ${{ env.BASE_VERSION }}"
         files: terraform/build/terraform-*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

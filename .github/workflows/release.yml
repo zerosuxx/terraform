@@ -1,0 +1,47 @@
+name: Patch Terraform and Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up Go and install gox
+      run: |
+        go install github.com/mitchellh/gox@latest
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+    - name: Extract base version
+      run: |
+        BASE_VERSION="${GITHUB_REF_NAME%%-*}"
+        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
+
+    - name: Clone Terraform and apply patch
+      run: |
+        git clone --branch "v$BASE_VERSION" https://github.com/hashicorp/terraform.git
+        cd terraform
+        git checkout -b patched
+        curl -sL https://patch-diff.githubusercontent.com/raw/zerosuxx/terraform-fork/pull/1.diff | git apply -
+
+    - name: Build with gox
+      run: |
+        cd terraform
+        mkdir -p build
+        gox -os="linux darwin" -arch="amd64 arm64" \
+            -output="build/terraform-{{.OS}}-{{.Arch}}"
+
+    - name: Create GitHub Release and upload binaries
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: "Terraform ${{ env.BASE_VERSION }}"
+        files: terraform/build/terraform-*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

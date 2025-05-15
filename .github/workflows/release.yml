@@ -39,8 +39,8 @@ jobs:
             -ldflags "${LD_FLAGS}" \
             -output="build/terraform-{{.Arch}}-{{.OS}}"
 
-        for f in build/*_arm64; do
-          mv -v "$f" "${f/_arm64/_aarch64}"
+        for f in build/*-arm64; do
+          mv -v "$f" "${f/arm64/aarch64}"
         done
       env:
         LD_FLAGS: "-s -w -X 'github.com/hashicorp/terraform/version.dev=no'"

@@ -28,6 +28,7 @@ jobs:
         git clone --branch "v$BASE_VERSION" https://github.com/hashicorp/terraform.git
         cd terraform
         git checkout -b patched
+        echo "${GITHUB_REF_NAME}" | tee version/VERSION
         curl -fsSL https://patch-diff.githubusercontent.com/raw/zerosuxx/terraform-fork/pull/1.diff | git apply -v -
 
     - name: Build with gox

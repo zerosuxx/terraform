@@ -39,7 +39,7 @@ jobs:
             -ldflags "${LD_FLAGS}" \
             -output="build/terraform-{{.Arch}}-{{.OS}}"
 
-        for f in build/*-arm64; do
+        for f in build/*arm64*; do
           mv -v "$f" "${f/arm64/aarch64}"
         done
       env:

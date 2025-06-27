@@ -30,6 +30,7 @@ jobs:
         git checkout -b patched
         echo "${GITHUB_REF_NAME}" | cut -c2- | tee version/VERSION
         curl -fsSL https://patch-diff.githubusercontent.com/raw/zerosuxx/terraform-fork/pull/1.diff | git apply -v -
+        curl -fsSL https://patch-diff.githubusercontent.com/raw/zerosuxx/terraform-fork/pull/2.diff | git apply -v -
 
     - name: Build with gox
       working-directory: ./terraform

@@ -37,8 +37,8 @@ jobs:
       run: |
         go mod download
         gox -os="linux darwin" -arch="amd64 arm64" \
-            -ldflags "${LD_FLAGS}" \
-            -output="build/terraform-{{.Arch}}-{{.OS}}"
+          -ldflags "${LD_FLAGS}" \
+          -output="build/terraform-{{.Arch}}-{{.OS}}"
 
         for f in build/*arm64*; do
           mv -v "$f" "${f/arm64/aarch64}"
